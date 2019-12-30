@@ -1,0 +1,57 @@
+server {
+    charset utf-8;
+    client_max_body_size 128M;
+    listen       80;
+    server_name  ${NGINX_HOST};
+
+    #if we want to balance via DNS rr
+    resolver 127.0.0.11;
+    set ${ESC}backends php;
+
+    #charset koi8-r;
+    access_log  /var/log/nginx/host.access.log;
+    error_log  /var/log/nginx/host.error.log;
+
+    location / {
+        root   ${NGINX_ROOT_DIR};
+        index  index.html index.htm index.php;
+
+        try_files ${ESC}uri ${ESC}uri/ /index.php${ESC}is_args${ESC}args;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+
+    # deny accessing php files for the /assets directory
+    location ~ ^/assets/.*\.php$ {
+        deny all;
+    }
+
+    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+    #
+    location ~ \.php$ {
+        root           ${NGINX_ROOT_DIR};
+        try_files ${ESC}uri =404;
+        fastcgi_pass   ${ESC}backends:9000;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  ${ESC}document_root${ESC}fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+    # deny access to .htaccess files, if Apache's document root
+    # concurs with nginx's one
+    #
+    location ~ /\.ht {
+        deny  all;
+    }
+    location ~* /\. {
+        deny all;
+    }
+}

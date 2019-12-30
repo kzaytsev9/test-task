@@ -14,7 +14,7 @@ $config = [
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '6HvN3eHuKXv8qNyKyOhnFr7ObF9mPSF2',
+            'cookieValidationKey' => getenv('COOKIE_VALIDATION_KEY'),
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -22,6 +22,7 @@ $config = [
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
+            'loginUrl'=>['/login'],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -43,14 +44,21 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'suffix' => '/',
+            'normalizer' => [
+                'class' => 'yii\web\UrlNormalizer',
+                'action' => yii\web\UrlNormalizer::ACTION_REDIRECT_PERMANENT,
+            ],
             'rules' => [
+                '' => 'site/index',
+                '<action>' => 'site/<action>',
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];
